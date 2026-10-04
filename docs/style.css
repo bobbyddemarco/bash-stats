@@ -1,0 +1,5 @@
+body { max-width: 900px; margin: 0 auto; padding: 1rem; }
+nav.bash-nav ul { gap: 1.5rem; }
+tr.top3 td { background: var(--pico-mark-background-color); }
+table td, table th { text-align: center; }
+table td:first-child, table th:first-child { text-align: left; }
