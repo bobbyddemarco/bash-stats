@@ -56,7 +56,7 @@ EXCLUDE_GAMES = {"Thumb Wrestle"}
 EXCLUDE_PEOPLE = {"Julie"}
 
 # S3 bucket (or wherever you host) base URL. All internal links point here.
-BASE_URL = "https://bobbyddemarco.github.io/bash-stats"
+BASE_URL = "https://bobbyddemarco.github.io/bash-stats/"
 
 # Manual overrides for game display name / filename slug, keyed by the
 # exact "Game" value as it appears in the CSV. Use this when the
