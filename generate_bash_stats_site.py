@@ -8,12 +8,13 @@ upload the contents of the output folder to your S3 bucket, and you're
 done.
 
 USAGE:
-    python3 generate_bash_stats_site.py rawGames.csv --outdir site
+    python3 generate_bash_stats_site.py rawGames.csv --outdir docs
 
 WHAT IT PRODUCES (all in --outdir):
     - one <person>StatsAllTime.html per person
     - one <game>.html per game/sport
     - bashStatsNames.html   (overall rankings, all people, all games)
+    - index.html            (identical copy of the above, the site homepage)
     - bashGamesSportsList.html (index of every game/sport)
     - allGames.html         (raw, unfiltered table of every game ever played)
     - style.css             (shared stylesheet used by every page)
@@ -36,7 +37,17 @@ CONFIG YOU MAY WANT TO TOUCH EACH YEAR:
       want individual stats tracked (like Julie). NOTE: excluding a
       person only hides THEIR stats -- their teammates still get full
       credit for the win/loss, since the game still happened.
-"""
+
+TODO:
+    - Update established date
+    - Add a minimum number of games played to be included in the overall rankings 
+    - Fix the Kevin vs. Kevin B issue
+    - Get this script to generate the bashPictures.html page too, or at least copy it from a source folder
+    - Add a way for people to enter in the results of their games in real time and have the site update automatically (maybe a Google Form that writes to the CSV, then a GitHub Action that runs this script and pushes the changes to GitHub Pages)
+    - Instead of showing like 2022-2024, show the actual years played (e.g. 2022, 2023, 2024) in the person and game pages
+    - Update with 2026 data
+
+    """
 
 import argparse
 import csv
@@ -55,8 +66,20 @@ EXCLUDE_GAMES = {"Thumb Wrestle"}
 # still get credit for games they played together.
 EXCLUDE_PEOPLE = {"Julie"}
 
-# S3 bucket (or wherever you host) base URL. All internal links point here.
+# Footer years: the first Summer Bash, and the first year stats were kept.
+FIRST_YEAR = 2009
+STATS_YEAR = 2022
+
+# Base URL of the published site. All internal links and the stylesheet
+# link are built from this. For GitHub Pages project sites it's
+# https://USERNAME.github.io/REPO/
 BASE_URL = "https://bobbyddemarco.github.io/bash-stats/"
+
+# Links are built as BASE_URL + filename, so the URL must end in "/".
+# Add it automatically if it was left off, so a missing slash can't
+# silently break every link.
+if not BASE_URL.endswith("/"):
+    BASE_URL += "/"
 
 # Manual overrides for game display name / filename slug, keyed by the
 # exact "Game" value as it appears in the CSV. Use this when the
@@ -221,16 +244,15 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 {nav}
 {body}
   <footer>
-    <small>Bobby's Summer Bash &middot; Est. 2022</small>
-  </footer>
+    <small>Bobby's Summer Bash &middot; Est. {first_year} &middot; Stats Era Est. {stats_year}</small>  </footer>
 </body>
 </html>
 """
 
 
 def render_page(title, body_html):
-    return PAGE_TEMPLATE.format(title=title, base=BASE_URL, nav=NAV_HTML, body=body_html)
-
+    return PAGE_TEMPLATE.format(title=title, base=BASE_URL, nav=NAV_HTML, body=body_html,
+                                first_year=FIRST_YEAR, stats_year=STATS_YEAR)
 
 def render_person_page(display, slug_for_game, entries, tot_w, tot_l, yr_min, yr_max):
     rows_html = ""
@@ -414,6 +436,10 @@ def main():
     html = render_overall_page(slug_for_person, overall)
     with open(os.path.join(args.outdir, "bashStatsNames.html"), "w") as f:
         f.write(html)
+    # GitHub Pages (and most web servers) serve index.html at the bare site
+    # URL, so the overall rankings page is also written as the homepage.
+    with open(os.path.join(args.outdir, "index.html"), "w") as f:
+        f.write(html)
 
     print("Generating games/sports index page...")
     games_sorted = sorted(game_person.keys(), key=lambda g: slug_for_game(g)[0])
@@ -430,7 +456,9 @@ def main():
         f.write(STYLE_CSS)
 
     print(f"\nDone. {len(os.listdir(args.outdir))} files written to '{args.outdir}/'.")
-    print("Upload the contents of that folder to your S3 bucket and you're set.")
+    print(f"Links point at: {BASE_URL}")
+    print("Commit and push to publish. (bashPictures.html is not generated -- "
+          "keep your own copy in the output folder.)")
 
 
 if __name__ == "__main__":
