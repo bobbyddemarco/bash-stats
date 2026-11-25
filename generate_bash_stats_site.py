@@ -39,13 +39,13 @@ CONFIG YOU MAY WANT TO TOUCH EACH YEAR:
       credit for the win/loss, since the game still happened.
 
 TODO:
-    - Update established date
     - Add a minimum number of games played to be included in the overall rankings 
+    - Update with 2026 data
+    - Send to everyone to check out
     - Fix the Kevin vs. Kevin B issue
     - Get this script to generate the bashPictures.html page too, or at least copy it from a source folder
     - Add a way for people to enter in the results of their games in real time and have the site update automatically (maybe a Google Form that writes to the CSV, then a GitHub Action that runs this script and pushes the changes to GitHub Pages)
     - Instead of showing like 2022-2024, show the actual years played (e.g. 2022, 2023, 2024) in the person and game pages
-    - Update with 2026 data
 
     """
 
@@ -109,6 +109,7 @@ KNOWN_GAMES = {
     "Cornhole", "Wiffleball", "Spikeball", "Billiards", "Table Hockey",
     "Volleyball", "Polish Horseshoes", "Kan Jam", "Triathalon",
     "Beer Ball", "Badminton", "Chameleon", "Wingspan", "Flip Cup",
+    "Smash Net",
 }
 KNOWN_PEOPLE = {
     "Bobby", "Jorge", "John", "Ari", "Scott", "Steve", "Impalli", "Mike G",
@@ -397,7 +398,7 @@ table td:first-child, table th:first-child { text-align: left; }
 def main():
     parser = argparse.ArgumentParser(description="Regenerate the Bash Stats site from a CSV.")
     parser.add_argument("csv_path", help="Path to the raw games CSV")
-    parser.add_argument("--outdir", default="site", help="Output directory (default: site)")
+    parser.add_argument("--outdir", default="docs", help="Output directory (default: site)")
     args = parser.parse_args()
 
     rows = load_rows(args.csv_path)
